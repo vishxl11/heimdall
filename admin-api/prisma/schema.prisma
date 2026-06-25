@@ -1,0 +1,83 @@
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model AdminUser{
+    adminId String @id @default(cuid())
+    email String @unique
+    password String 
+    createdAt DateTime @default(now())   
+
+     routes Route[]
+     auditLogs AuditLog[]
+}
+
+model Route{
+    adminId String
+    routeId String @id @default(cuid())
+    path String
+    upstreamURL String
+    createdAt DateTime @default(now())
+    method String
+    isActive Boolean @default(true)
+
+    admin AdminUser @relation(fields: [adminId],references: [adminId])
+
+    RateLimitPolicies RateLimitPolicy?
+    circuitBreakerConfigs CircuitBreakerConfig?
+}
+
+enum RateLimitKey {
+    USER_ID
+    API_KEY
+    IP
+}
+
+model RateLimitPolicy{
+    id String @id @default(cuid())
+    routeId String  @unique
+    limit Int
+    windowSeconds Int
+    identifierType RateLimitKey
+    createdAt DateTime @default(now())
+
+    route Route @relation(fields: [routeId],references: [routeId])
+}
+
+
+model CircuitBreakerConfig{
+    id String  @id @default(cuid())
+    routeId String  @unique
+    failureThreshold Int
+    windowSeconds Int
+    openDurationSeconds Int
+    halfOpenMaxRequests Int 
+    createdAt DateTime @default(now())
+
+     route Route @relation(fields: [routeId],references: [routeId])
+
+}
+
+model AuditLog{
+    id String  @id @default(cuid())
+    adminId String 
+    action String
+    entityType String
+    entityId String
+    previousValue Json?
+    newValue Json
+    createdAt DateTime @default(now())
+
+     admin AdminUser @relation(fields: [adminId],references: [adminId])
+}
+
+
+
+
+
+

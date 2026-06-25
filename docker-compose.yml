@@ -1,0 +1,44 @@
+services:
+
+ redis:
+  image: redis:7-alpine
+  ports:
+   - "6379:6379"
+ 
+ postgres:
+  image: postgres:16-alpine
+  ports: 
+   - "5433:5432"
+  environment:
+   POSTGRES_USER: ${POSTGRES_USER}
+   POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+   POSTGRES_DB: ${POSTGRES_DB}
+  volumes:
+    - postgres_data:/var/lib/postgresql/data
+ 
+ admin-api: 
+  build: ./admin-api
+  ports: 
+   - "4000:4000"
+  depends_on:
+    - postgres
+    - redis
+  environment:
+    DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    REDIS_URL: redis://redis:6379
+    JWT_SECRET: ${JWT_SECRET}
+
+
+ gateway-core:
+  build: ./gateway-core
+  ports:
+   - "3000:3000"
+  depends_on: 
+   - postgres
+   - redis
+
+
+
+
+volumes:
+  postgres_data:
