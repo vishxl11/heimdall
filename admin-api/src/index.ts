@@ -6,6 +6,7 @@ import policiesRouter from './policies/policies.router.js'
 import cbRouter from './circuitbreaker/cb.router.js' ;
 import auditRouter from './audit-logs/audit.router.js'
 import usersRouter from './admin-users/users.router.js'
+import internalRouter from './internal/internal.router.js';
 
 
 const app=express() ;
@@ -23,6 +24,8 @@ app.use('/admin', cbRouter) ;
 app.use('/admin', auditRouter) ;
 
 app.use('/admin', usersRouter) ;
+
+app.use('/internal',internalRouter) ;
 
 app.get("/health",(req,res)=>{
 

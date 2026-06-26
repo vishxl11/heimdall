@@ -27,15 +27,28 @@ services:
     DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     REDIS_URL: redis://redis:6379
     JWT_SECRET: ${JWT_SECRET}
+  healthcheck:
+   test: ["CMD", "node", "-e", "fetch('http://localhost:4000/health').then(() => process.exit(0)).catch(() => process.exit(1))"]
+   interval: 5s
+   timeout: 3s
+   retries: 10
+   start_period: 15s
 
 
  gateway-core:
   build: ./gateway-core
   ports:
    - "3000:3000"
-  depends_on: 
-   - postgres
-   - redis
+  depends_on:
+    admin-api:
+      condition: service_healthy
+    redis:
+      condition: service_started
+
+  environment:
+    REDIS_URL: redis://redis:6379
+    ADMIN_API_URL: http://admin-api:4000
+
 
 
 

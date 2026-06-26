@@ -18,7 +18,12 @@ export async function createRoute(data:CreateRouteInput,adminId:string,){
         }
     })
 
-    await createAuditLog(adminId,"ROUTE_CREATED","ROUTE",route.routeId,null,route)
+    await createAuditLog(adminId,"ROUTE_CREATED","ROUTE",route.routeId,null,route) ;
+
+   await redisClient.publish('heimdall:route-update', JSON.stringify({ 
+    routeId: route.routeId, 
+    action: 'CREATED' 
+    }))
 
     return route ;
 }
@@ -63,6 +68,11 @@ export async function updateRoute(data:UpdateRouteInput,routeId:string,adminId:s
 
    await createAuditLog(adminId,"ROUTE_UPDATE","ROUTE",routeId,previousValue,newValue) ;
 
+     await redisClient.publish('heimdall:route-update', JSON.stringify({ 
+    routeId: newValue.routeId, 
+    action: 'UPDATED' 
+    }))
+
    return newValue ;
 
 }
@@ -82,5 +92,10 @@ export async function deleteRoute(routeId:string,adminId:string) {
     })
 
     await createAuditLog(adminId ,"ROUTE_DELETE","ROUTE",routeId,previousValue,null)
+
+     await  redisClient.publish('heimdall:route-update', JSON.stringify({ 
+    routeId: routeId, 
+    action: 'DELETED' 
+    }))
     
 }
