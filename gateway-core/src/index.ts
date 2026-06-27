@@ -3,6 +3,7 @@ import { proxyController } from './proxy/proxy.handler.js';
 import { subscribe } from './cache/subscriber.js';
 import { loadRoutes } from './cache/loader.js';
 import { connectRedisSubscribe } from './config/redis.js';
+import { pipeline } from './plugins/pipeline.js';
 
 const app=express() ;
 
@@ -16,7 +17,7 @@ app.get("/health",(req,res)=>{
     })
 })
 
-app.use('/', proxyController)
+app.use('/', pipeline, proxyController)
 
 async function init() {
     await connectRedisSubscribe()

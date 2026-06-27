@@ -11,14 +11,9 @@ export const proxyController=(req:Request,res:Response,next:NextFunction)=>{
         const path=req.path ;
         const method=req.method ;
 
-        const route=getRoute(path,method) ;
+       const route = (req as any).matchedRoute
 
-        if(!route)
-        {
-            return res.status(404).json({
-                message:"Route not found"
-            }) ;
-        }
+    
 
        const proxy = createProxyMiddleware({
         target: route.upstreamURL,

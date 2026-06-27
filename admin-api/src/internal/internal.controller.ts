@@ -8,6 +8,10 @@ export const getRoutesInternal=async (req:Request,res:Response,next:NextFunction
             {
                 where:{
                     isActive:true 
+                },
+                include: {
+                    RateLimitPolicies: true,
+                    circuitBreakerConfigs: true
                 }
             }
         ) ;
@@ -31,6 +35,10 @@ export const getRouteByIdInternal=async (req:Request,res:Response,next:NextFunct
             const route=await prisma.route.findUnique({
                 where:{
                     routeId
+                },
+                include: {
+                    RateLimitPolicies: true,
+                    circuitBreakerConfigs: true
                 }
             }
             )

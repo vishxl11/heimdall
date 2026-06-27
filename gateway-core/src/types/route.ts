@@ -1,3 +1,28 @@
+enum RateLimitKey{
+         USER_ID,
+        API_KEY,
+        IP
+    }
+
+type RateLimitType={
+    id :string, 
+    routeId :string ,
+    limit: number ,
+    windowSeconds: number,
+    identifierType :RateLimitKey,
+    createdAt :Date 
+}
+
+type CBtype={
+    id :string  ,
+    routeId: string ,
+    failureThreshold: number,
+    windowSeconds :number,
+    openDurationSeconds :number,
+    halfOpenMaxRequests :number,
+    createdAt:Date
+}
+
 export type Route={
     adminId: string,
     routeId :string 
@@ -5,6 +30,10 @@ export type Route={
     upstreamURL: string,
     createdAt : Date ,
     method : string ,
-    isActive :boolean 
+    isActive :boolean ,
+    RateLimitPolicies: RateLimitType | null,
+    circuitBreakerConfigs: CBtype | null
 }
+
+
 
