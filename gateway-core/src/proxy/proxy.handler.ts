@@ -1,32 +1,25 @@
-import type{ Request,Response,NextFunction } from "express"
-import { getRoute } from "../cache/route.cache.js";
-import { createProxyMiddleware } from "http-proxy-middleware";
+import type { Request, Response, NextFunction } from "express"
+import { createProxyMiddleware } from "http-proxy-middleware"
 
+const proxyCache = new Map()
 
+export const proxyController = (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const route = (req as any).matchedRoute
 
-export const proxyController=(req:Request,res:Response,next:NextFunction)=>{
-
-    try{
-
-        const path=req.path ;
-        const method=req.method ;
-
-       const route = (req as any).matchedRoute
-
-    
-
-       const proxy = createProxyMiddleware({
-        target: route.upstreamURL,
-        changeOrigin: true,
-        pathRewrite: { [`^${route.path}`]: '' }
-    })
+        let proxy = proxyCache.get(route.upstreamURL)
+        if (!proxy) {
+            proxy = createProxyMiddleware({
+                target: route.upstreamURL,
+                changeOrigin: true,
+                pathRewrite: { [`^${route.path}`]: '' }
+            })
+            proxyCache.set(route.upstreamURL, proxy)
+        }
 
         proxy(req, res, next)
-
     }
-    catch(e)
-    {
-         next(e) ;
+    catch (e) {
+        next(e)
     }
-
 }
