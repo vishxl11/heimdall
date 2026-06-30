@@ -10,3 +10,9 @@ export async function connectRedisSubscribe() {
 }
 
 
+export const redisClient = createClient({ url: REDIS_URL })
+
+export async function connectRedis() {
+    await redisClient.connect()
+}
+

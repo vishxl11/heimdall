@@ -1,4 +1,4 @@
-enum RateLimitKey{
+export enum RateLimitKey{
          USER_ID,
         API_KEY,
         IP
@@ -31,8 +31,8 @@ export type Route={
     createdAt : Date ,
     method : string ,
     isActive :boolean ,
-    RateLimitPolicies: RateLimitType | null,
-    circuitBreakerConfigs: CBtype | null
+    RateLimitPolicies: RateLimitType ,
+    circuitBreakerConfigs: CBtype 
 }
 
 

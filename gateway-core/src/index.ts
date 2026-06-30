@@ -2,7 +2,7 @@ import express from 'express'
 import { proxyController } from './proxy/proxy.handler.js';
 import { subscribe } from './cache/subscriber.js';
 import { loadRoutes } from './cache/loader.js';
-import { connectRedisSubscribe } from './config/redis.js';
+import { connectRedis, connectRedisSubscribe } from './config/redis.js';
 import { pipeline } from './plugins/pipeline.js';
 
 const app=express() ;
@@ -23,6 +23,7 @@ async function init() {
     await connectRedisSubscribe()
     await loadRoutes()
     await subscribe()
+    await connectRedis()
     app.listen(3000, () => console.log("gateway-core is running on port 3000"))
 }
 
