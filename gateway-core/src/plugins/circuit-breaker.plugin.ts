@@ -1,7 +1,9 @@
 import { getCircuitState, recordFailure, recordSuccess } from '../circuit-breaker/cb.services.js'
 import { redisClient } from '../config/redis.js'
+import { circuitBreakerState } from '../metrics/metrics.js'
 import type { Plugin } from './plugin.type.js'
 import { trace, SpanStatusCode } from '@opentelemetry/api'
+
 
 const tracer = trace.getTracer('gateway-core')
 
@@ -21,6 +23,9 @@ export const circuitBreakerPlugin: Plugin = async (req, res, next, route) => {
         const windowSeconds = route.circuitBreakerConfigs.windowSeconds
 
         const state = await getCircuitState(routeId, openDurationSeconds)
+
+        const stateValue = state === 'CLOSED' ? 0 : state === 'HALF_OPEN' ? 1 : 2
+        circuitBreakerState.set({ route_id: routeId }, stateValue)
 
         span.setAttribute('circuit.state', state ?? 'CLOSED')
         span.setAttribute('route.id', routeId)

@@ -6,12 +6,14 @@ import { circuitBreakerPlugin } from "./circuit-breaker.plugin.js"
 import { rateLimiterPlugin } from "./rateLimiter.plugin.js"
 import { transformerPlugin } from "./transformer.plugin.js"
 import { trace, SpanStatusCode } from '@opentelemetry/api'
+import { httpRequestCounter, httpRequestDuration } from '../metrics/metrics.js'
 
 const tracer = trace.getTracer('gateway-core')
 
 export const pipeline = async (req: Request, res: Response, next: NextFunction) => {
 
     const span = tracer.startSpan('route-match')
+    const timer = httpRequestDuration.startTimer({ method: req.method, path: req.path })
 
     try {
         const path = req.path
@@ -23,6 +25,8 @@ export const pipeline = async (req: Request, res: Response, next: NextFunction) 
         if (!route) {
             span.setAttribute('route.found', false)
             span.end()
+            timer()
+            httpRequestCounter.inc({ method, path, status: '404' })
             return res.status(404).json({ message: "Route not found" })
         }
 
@@ -32,6 +36,15 @@ export const pipeline = async (req: Request, res: Response, next: NextFunction) 
         span.setAttribute('route.id', route.routeId)
 
         ;(req as any).matchedRoute = route
+
+        res.on('finish', () => {
+            timer()
+            httpRequestCounter.inc({
+                method: req.method,
+                path: route.path,
+                status: res.statusCode.toString()
+            })
+        })
 
         if (route.RateLimitPolicies) plugins.push(rateLimiterPlugin)
         if (route.circuitBreakerConfigs) plugins.push(circuitBreakerPlugin)
@@ -56,6 +69,7 @@ export const pipeline = async (req: Request, res: Response, next: NextFunction) 
         span.recordException(e as Error)
         span.setStatus({ code: SpanStatusCode.ERROR })
         span.end()
+        timer()
         next(e)
     }
 }

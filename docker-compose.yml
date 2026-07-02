@@ -58,7 +58,13 @@ services:
     - "4318:4318"     # OTLP HTTP receiver
   environment:
     COLLECTOR_OTLP_ENABLED: "true"
-
+    
+ prometheus:
+  image: prom/prometheus:latest
+  ports:
+    - "9090:9090"
+  volumes:
+    - ./prometheus.yml:/etc/prometheus/prometheus.yml
 
 volumes:
   postgres_data:

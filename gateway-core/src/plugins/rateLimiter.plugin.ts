@@ -3,6 +3,7 @@ import type { Route } from '../types/route.js'
 import { RateLimitKey } from '../types/route.js'
 import { checkRateLimit } from '../rate-limit/rate-limit.service.js'
 import { trace,SpanStatusCode } from '@opentelemetry/api'
+import { rateLimitRejections } from '../metrics/metrics.js'
 
 export const rateLimiterPlugin: Plugin = async (req, res, next, route: Route) => {
 
@@ -33,6 +34,7 @@ export const rateLimiterPlugin: Plugin = async (req, res, next, route: Route) =>
         span.setAttribute('route.id', route.routeId)
 
         if (!allowed) {
+            rateLimitRejections.inc({ route_id: route.routeId })
             span.end()
             return res.status(429).json({ message: 'Too many Requests' })
         }

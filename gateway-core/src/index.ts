@@ -5,6 +5,7 @@ import { subscribe } from './cache/subscriber.js';
 import { loadRoutes } from './cache/loader.js';
 import { connectRedis, connectRedisSubscribe } from './config/redis.js';
 import { pipeline } from './plugins/pipeline.js';
+import { register } from './metrics/metrics.js';
 
 const app=express() ;
 
@@ -16,6 +17,11 @@ app.get("/health",(req,res)=>{
         status:"ok",
         service:"gateway-core"
     })
+})
+
+app.get('/metrics', async (req, res) => {
+    res.set('Content-Type', register.contentType)
+    res.send(await register.metrics())
 })
 
 app.use('/', pipeline, proxyController)
