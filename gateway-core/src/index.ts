@@ -1,3 +1,4 @@
+import './tracing.js'
 import express from 'express'
 import { proxyController } from './proxy/proxy.handler.js';
 import { subscribe } from './cache/subscriber.js';

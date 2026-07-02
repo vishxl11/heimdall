@@ -48,9 +48,16 @@ services:
   environment:
     REDIS_URL: redis://redis:6379
     ADMIN_API_URL: http://admin-api:4000
+    OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+    SERVICE_NAME: gateway-core
 
-
-
+ jaeger:
+  image: jaegertracing/all-in-one:latest
+  ports:
+    - "16686:16686"   # Jaeger UI
+    - "4318:4318"     # OTLP HTTP receiver
+  environment:
+    COLLECTOR_OTLP_ENABLED: "true"
 
 
 volumes:
